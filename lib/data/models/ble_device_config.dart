@@ -8,7 +8,8 @@ part 'ble_device_config.g.dart';
 @JsonSerializable()
 class BLEDeviceConfig extends Equatable {
   final String name;
-  final DeviceType type;
+  @JsonKey(fromJson: _deviceTypeFromJson, toJson: _deviceTypeToJson)
+  final MedicalDeviceType type;
   final String serviceUuid;
   final String measurementCharacteristicUuid;
   final List<String> nameFilters;
@@ -39,13 +40,23 @@ class BLEDeviceConfig extends Equatable {
       ];
 }
 
+// JSON converter functions for MedicalDeviceType
+MedicalDeviceType _deviceTypeFromJson(String type) {
+  return MedicalDeviceType.values.firstWhere(
+    (e) => e.name == type,
+    orElse: () => MedicalDeviceType.unknown,
+  );
+}
+
+String _deviceTypeToJson(MedicalDeviceType type) => type.name;
+
 // Predefined device configurations
 class DeviceConfigs {
   static const List<BLEDeviceConfig> allConfigs = [
     // Blood Pressure Monitor
     BLEDeviceConfig(
       name: 'Blood Pressure Monitor',
-      type: DeviceType.bloodPressure,
+      type: MedicalDeviceType.bloodPressure,
       serviceUuid: '00001810-0000-1000-8000-00805f9b34fb',
       measurementCharacteristicUuid: '00002a35-0000-1000-8000-00805f9b34fb',
       nameFilters: ['BP', 'Blood Pressure', 'Pressure'],
@@ -61,7 +72,7 @@ class DeviceConfigs {
     // Glucose Meter
     BLEDeviceConfig(
       name: 'Glucose Meter',
-      type: DeviceType.glucoseMeter,
+      type: MedicalDeviceType.glucoseMeter,
       serviceUuid: '00001808-0000-1000-8000-00805f9b34fb',
       measurementCharacteristicUuid: '00002a18-0000-1000-8000-00805f9b34fb',
       nameFilters: ['Glucose', 'BG', 'Blood Glucose'],
@@ -76,7 +87,7 @@ class DeviceConfigs {
     // Weight Scale
     BLEDeviceConfig(
       name: 'Weight Scale',
-      type: DeviceType.weightScale,
+      type: MedicalDeviceType.weightScale,
       serviceUuid: '0000181d-0000-1000-8000-00805f9b34fb',
       measurementCharacteristicUuid: '00002a9d-0000-1000-8000-00805f9b34fb',
       nameFilters: ['Scale', 'Weight', 'BMI'],
@@ -91,7 +102,7 @@ class DeviceConfigs {
     // Pulse Oximeter
     BLEDeviceConfig(
       name: 'Pulse Oximeter',
-      type: DeviceType.pulseOximeter,
+      type: MedicalDeviceType.pulseOximeter,
       serviceUuid: '00001822-0000-1000-8000-00805f9b34fb',
       measurementCharacteristicUuid: '00002a5e-0000-1000-8000-00805f9b34fb',
       nameFilters: ['Oximeter', 'SpO2', 'Pulse Ox'],
@@ -105,7 +116,7 @@ class DeviceConfigs {
     ),
   ];
 
-  static BLEDeviceConfig? getConfigForDeviceType(DeviceType type) {
+  static BLEDeviceConfig? getConfigForDeviceType(MedicalDeviceType type) {
     try {
       return allConfigs.firstWhere((config) => config.type == type);
     } catch (e) {
