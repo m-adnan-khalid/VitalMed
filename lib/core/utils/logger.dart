@@ -373,8 +373,8 @@ class VitalMedLogOutput extends LogOutput {
   IOSink? _sink;
 
   @override
-  void init() {
-    super.init();
+  Future<void> init() async {
+    await super.init();
     _openFile();
   }
 
@@ -393,9 +393,9 @@ class VitalMedLogOutput extends LogOutput {
   }
 
   @override
-  void destroy() {
-    _sink?.close();
-    super.destroy();
+  Future<void> destroy() async {
+    await _sink?.close();
+    await super.destroy();
   }
 
   void _openFile() {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:permission_handler/permission_handler.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
@@ -10,15 +10,16 @@ void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
 
-    // Initialize app logger first
-    AppLogger.info('Starting ${AppConstants.appName} v${AppConstants.appVersion}');
+    // Initialize professional logging system
+    await VitalMedLogger.initialize();
+    VitalMedLogger.info('Starting ${AppConstants.appName} v${AppConstants.appVersion}');
 
     // Set preferred orientations safely
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]).catchError((e) {
-      AppLogger.warning('Could not set orientations: $e');
+      VitalMedLogger.warning('Could not set orientations: $e');
     });
 
     // Skip Hive initialization to avoid crashes
@@ -28,9 +29,16 @@ void main() async {
 
     runApp(const HealthMonitorApp());
   } catch (e, stackTrace) {
-    AppLogger.error('Fatal error in main:', e);
-    print('CRASH: $e');
+    // Use print as fallback since logger might not be initialized
+    print('VitalMed Fatal Error: $e');
     print('Stack: $stackTrace');
+    
+    // Try to log if possible
+    try {
+      VitalMedLogger.fatal('Fatal error in main', error: e, stackTrace: stackTrace);
+    } catch (_) {
+      // Ignore logging errors during crash
+    }
     
     // Run minimal app even if initialization fails
     runApp(
@@ -83,11 +91,11 @@ Future<void> _checkPermissions() async {
 
       for (final permission in permissions) {
         if (statuses[permission] != PermissionStatus.granted) {
-          AppLogger.warning('Permission not granted: ${permission.toString()}');
+          VitalMedLogger.warning('Permission not granted: ${permission.toString()}');
         }
       }
     } catch (e) {
-      AppLogger.error('Error requesting permissions', e);
+      VitalMedLogger.error('Error requesting permissions', error: e);
     }
   }
 }
@@ -148,7 +156,7 @@ class _SimpleDashboardScreenState extends State<SimpleDashboardScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppConstants.appName),
+        title: Text(AppConstants.appDisplayName),
         centerTitle: true,
         actions: [
           Container(
@@ -285,7 +293,7 @@ class _SimpleDashboardScreenState extends State<SimpleDashboardScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Welcome to VitalSync',
+                  'Welcome to ${AppConstants.appDisplayName}',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     color: AppConstants.textOnPrimary,
                     fontWeight: FontWeight.bold,
@@ -293,7 +301,7 @@ class _SimpleDashboardScreenState extends State<SimpleDashboardScreen>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Your professional BLE health monitoring system',
+                  AppConstants.appDescription,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: AppConstants.textOnPrimary.withValues(alpha: 0.9),
                   ),
