@@ -1,0 +1,124 @@
+name: Build VitalSync APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📋 Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: ☕ Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        
+    - name: 🐦 Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.3'
+        channel: 'stable'
+        
+    - name: 📦 Get Dependencies
+      run: flutter pub get
+      
+    - name: 🔍 Verify Flutter Setup
+      run: flutter doctor -v
+      
+    - name: 🧹 Clean Project
+      run: flutter clean
+      
+    - name: 📦 Get Dependencies Again
+      run: flutter pub get
+      
+    - name: 🔨 Generate Code (if needed)
+      run: |
+        if grep -q build_runner pubspec.yaml; then
+          flutter packages pub run build_runner build --delete-conflicting-outputs
+        fi
+      continue-on-error: true
+      
+    - name: 🔨 Build Debug APK
+      run: flutter build apk --debug --target-platform android-arm,android-arm64
+      
+    - name: 🔨 Build Release APK
+      run: flutter build apk --release --target-platform android-arm,android-arm64
+      
+    - name: 📊 List APK Files
+      run: |
+        echo "🎯 Generated APK files:"
+        ls -la build/app/outputs/flutter-apk/
+        
+    - name: 📤 Upload Debug APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: vitalsync-debug-apk
+        path: build/app/outputs/flutter-apk/app-debug.apk
+        retention-days: 30
+        
+    - name: 📤 Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: vitalsync-release-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+        retention-days: 30
+        
+    - name: 📝 Create APK Info
+      run: |
+        echo "# 📱 VitalSync APK Build Complete!" > apk-info.md
+        echo "" >> apk-info.md
+        echo "## 📊 Build Information" >> apk-info.md
+        echo "- **Build Date:** $(date)" >> apk-info.md
+        echo "- **Flutter Version:** $(flutter --version | head -1)" >> apk-info.md
+        echo "- **Commit:** ${{ github.sha }}" >> apk-info.md
+        echo "" >> apk-info.md
+        echo "## 📱 APK Files Generated" >> apk-info.md
+        echo "- **Debug APK:** \`app-debug.apk\` (for testing)" >> apk-info.md
+        echo "- **Release APK:** \`app-release.apk\` (optimized)" >> apk-info.md
+        echo "" >> apk-info.md
+        echo "## 📋 Installation Instructions" >> apk-info.md
+        echo "1. Download the APK from the artifacts section" >> apk-info.md
+        echo "2. Enable 'Unknown Sources' on your Android phone" >> apk-info.md
+        echo "3. Install the APK on your phone" >> apk-info.md
+        echo "4. Grant all permissions (Bluetooth, Location, Storage)" >> apk-info.md
+        echo "5. Start monitoring your health with real BLE devices!" >> apk-info.md
+        echo "" >> apk-info.md
+        echo "## 🎯 APK Details" >> apk-info.md
+        echo "\`\`\`" >> apk-info.md
+        ls -la build/app/outputs/flutter-apk/ >> apk-info.md
+        echo "\`\`\`" >> apk-info.md
+        
+    - name: 📤 Upload APK Info
+      uses: actions/upload-artifact@v4
+      with:
+        name: apk-build-info
+        path: apk-info.md
+        retention-days: 30
+
+  notify-completion:
+    needs: build-apk
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: 🎉 Build Success Notification
+      if: needs.build-apk.result == 'success'
+      run: |
+        echo "🎉 VitalSync APK built successfully!"
+        echo "📱 Download your APK from the Actions artifacts"
+        echo "🔗 Go to: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        
+    - name: ❌ Build Failed Notification  
+      if: needs.build-apk.result == 'failure'
+      run: |
+        echo "❌ APK build failed!"
+        echo "🔍 Check the build logs above for details"
+        echo "🔗 Build URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"

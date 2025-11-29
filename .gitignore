@@ -1,0 +1,363 @@
+# VitalSync - Flutter Project .gitignore
+# This file excludes unnecessary files from version control
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# iOS/macOS build outputs and ephemeral Flutter cache
+/ios/Flutter/App.framework
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/ephemeral/
+/ios/Runner/GeneratedPluginRegistrant.*
+/macos/Flutter/GeneratedPluginRegistrant.swift
+/macos/Flutter/ephemeral/
+
+# Windows build outputs
+/windows/flutter/generated_plugin_registrant.cc
+/windows/flutter/generated_plugin_registrant.h
+/windows/flutter/generated_plugins.cmake
+/windows/flutter/ephemeral/
+
+# Linux build outputs
+/linux/flutter/generated_plugin_registrant.cc
+/linux/flutter/generated_plugin_registrant.h
+/linux/flutter/generated_plugins.cmake
+/linux/flutter/ephemeral/
+
+# Web build outputs
+/web/
+
+# Coverage reports
+coverage/
+lcov.info
+
+# Test related
+/test/.test_coverage.dart
+
+# Exceptions to above rules - keep these files
+!/web/favicon.png
+!/web/index.html
+!/web/manifest.json
+!/web/icons/
+
+# Build outputs
+build/
+*.apk
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Gradle files (Android)
+.gradle/
+gradle-wrapper.jar
+*.jks
+key.properties
+google-services.json
+GoogleService-Info.plist
+
+# Local configuration files
+*.env
+.env.local
+.env.production
+.env.development
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# Flutter version management
+.fvm/
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.chopper.dart
+*.config.dart
+
+# Keep important generated files
+!lib/**/*.g.dart
+!lib/**/*.freezed.dart
+
+# Chrome device files (from .dart_tool)
+.dart_tool/chrome-device/
+
+# Firebase
+.firebase/
+firebase.json
+.firebaserc
+
+# Fastlane
+/ios/fastlane/
+/android/fastlane/
+
+# CocoaPods (iOS)
+/ios/Pods/
+/ios/Podfile.lock
+/ios/.symlinks/
+/ios/Flutter/flutter_export_environment.sh
+
+# Android keystore
+*.keystore
+*.jks
+
+# Generated plugin files
+**/GeneratedPluginRegistrant.java
+**/GeneratedPluginRegistrant.swift
+**/GeneratedPluginRegistrant.m
+**/generated_plugin_registrant.dart
+
+# Platform specific build folders
+ios/.symlinks/
+android/.gradle/
+android/app/build/
+android/build/
+android/gradle/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+
+# Analysis and documentation
+doc/api/
+.flutter-plugins-dependencies
+
+# Hive database boxes
+*.hive
+boxes/
+
+# Network related
+*.pem
+*.cert
+*.key
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Package files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases
+*.log
+*.sql
+*.sqlite
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# nyc test coverage
+.nyc_output
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# dotenv environment variables file
+.env
+
+# Serverless directories
+.serverless
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port
+
+# Stores VSCode versions used for testing VSCode extensions
+.vscode-test
+
+# Keep important config files
+!analysis_options.yaml
+!pubspec.yaml
+!pubspec.lock
+!README.md
+!LICENSE
+!CHANGELOG.md
+
+# Keep build scripts and documentation
+!build_apk.sh
+!build_apk.bat
+!*.md
+!.github/
+
+# Keep Flutter configuration
+!flutter_application_1.iml
+!devtools_options.yaml
+
+# Keep minimal Android configuration (needed for builds)
+!android/app/build.gradle.kts
+!android/app/src/main/AndroidManifest.xml
+!android/app/src/main/kotlin/com/example/flutter_application_1/MainActivity.kt
+!android/build.gradle.kts
+!android/settings.gradle.kts
+!android/gradle.properties
+
+# Keep minimal iOS configuration
+!ios/Runner.xcodeproj/
+!ios/Runner/
+!ios/Runner.xcworkspace/
+!ios/Podfile
+!ios/Flutter/
+
+# Keep web essentials
+!web/favicon.png
+!web/index.html
+!web/manifest.json
+!web/icons/
+
+# Keep source code
+!lib/
+!test/
+
+# Exclude generated code but keep structure
+lib/**/*.g.dart
+lib/**/*.freezed.dart
+!lib/data/models/*.g.dart
+
+# Keep documentation and guides
+!BUILD_APK_INSTRUCTIONS.md
+!APK_TESTING_GUIDE.md
+!GITHUB_APK_BUILD.md
+!APK_READY_TO_BUILD.md
+!APK_BUILD_SUMMARY.md
+!MODERN_DESIGN_IMPROVEMENTS.md
+!REAL_WORLD_BLE_IMPLEMENTATION.md
