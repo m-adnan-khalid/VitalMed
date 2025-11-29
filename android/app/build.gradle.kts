@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.vitalsync.healthmonitor"
-    compileSdk = 34
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -24,7 +24,7 @@ android {
         applicationId = "com.vitalsync.healthmonitor"
         // BLE requires minimum API 21 (Android 5.0)
         minSdk = 21
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "2.0.0"
         
