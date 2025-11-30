@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.vitalsync.healthmonitor"
+    namespace = "com.vitalmed.pro"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -20,8 +20,8 @@ android {
     }
 
     defaultConfig {
-        // VitalSync Health Monitor Application ID
-        applicationId = "com.vitalsync.healthmonitor"
+        // VitalMed Pro Application ID
+        applicationId = "com.vitalmed.pro"
         // BLE requires minimum API 21 (Android 5.0)
         minSdk = 21
         targetSdk = 36

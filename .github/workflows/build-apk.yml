@@ -1,4 +1,4 @@
-name: Build VitalSync APK
+name: Build VitalMed Pro APK
 
 on:
   push:
@@ -21,14 +21,38 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
         
+    - name: 🤖 Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: 34
+        build-tools-version: 34.0.0
+        ndk-version: 25.1.8937393
+        
     - name: 🐦 Setup Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.38.3'
         channel: 'stable'
+        cache: true
         
+    - name: 🗄️ Cache Flutter dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.pub-cache
+          .dart_tool
+        key: flutter-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+        restore-keys: |
+          flutter-${{ runner.os }}-
+      
     - name: 📦 Get Dependencies
       run: flutter pub get
+      
+    - name: 📝 Accept Android Licenses
+      run: |
+        export ANDROID_HOME=$ANDROID_SDK_ROOT
+        export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+        yes | sdkmanager --licenses || echo "License acceptance completed"
       
     - name: 🔍 Verify Flutter Setup
       run: flutter doctor -v
@@ -39,18 +63,23 @@ jobs:
     - name: 📦 Get Dependencies Again
       run: flutter pub get
       
-    - name: 🔨 Generate Code (if needed)
+    - name: 🔨 Generate Code
       run: |
-        if grep -q build_runner pubspec.yaml; then
-          flutter packages pub run build_runner build --delete-conflicting-outputs
-        fi
-      continue-on-error: true
+        echo "Running code generation for VitalMed..."
+        flutter packages pub run build_runner build --delete-conflicting-outputs
+      continue-on-error: false
       
     - name: 🔨 Build Debug APK
-      run: flutter build apk --debug --target-platform android-arm,android-arm64
+      run: |
+        echo "Building VitalMed Pro Debug APK..."
+        export ANDROID_HOME=$ANDROID_SDK_ROOT
+        flutter build apk --debug --target-platform android-arm,android-arm64 --verbose
       
-    - name: 🔨 Build Release APK
-      run: flutter build apk --release --target-platform android-arm,android-arm64
+    - name: 🔨 Build Release APK (Unsigned)
+      run: |
+        echo "Building VitalMed Pro Release APK..."
+        export ANDROID_HOME=$ANDROID_SDK_ROOT
+        flutter build apk --release --target-platform android-arm,android-arm64 --verbose
       
     - name: 📊 List APK Files
       run: |
@@ -60,20 +89,20 @@ jobs:
     - name: 📤 Upload Debug APK
       uses: actions/upload-artifact@v4
       with:
-        name: vitalsync-debug-apk
+        name: vitalmed-debug-apk
         path: build/app/outputs/flutter-apk/app-debug.apk
         retention-days: 30
         
     - name: 📤 Upload Release APK
       uses: actions/upload-artifact@v4
       with:
-        name: vitalsync-release-apk
+        name: vitalmed-release-apk
         path: build/app/outputs/flutter-apk/app-release.apk
         retention-days: 30
         
     - name: 📝 Create APK Info
       run: |
-        echo "# 📱 VitalSync APK Build Complete!" > apk-info.md
+        echo "# 📱 VitalMed Pro APK Build Complete!" > apk-info.md
         echo "" >> apk-info.md
         echo "## 📊 Build Information" >> apk-info.md
         echo "- **Build Date:** $(date)" >> apk-info.md
@@ -112,7 +141,7 @@ jobs:
     - name: 🎉 Build Success Notification
       if: needs.build-apk.result == 'success'
       run: |
-        echo "🎉 VitalSync APK built successfully!"
+        echo "🎉 VitalMed Pro APK built successfully!"
         echo "📱 Download your APK from the Actions artifacts"
         echo "🔗 Go to: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         

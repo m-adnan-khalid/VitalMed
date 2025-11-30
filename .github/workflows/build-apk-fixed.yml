@@ -1,0 +1,168 @@
+name: VitalMed Pro APK Build (Fixed)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
+    steps:
+    - name: 📋 Checkout Repository
+      uses: actions/checkout@v4
+      
+    - name: ☕ Setup Java JDK
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: 🤖 Setup Android SDK
+      uses: android-actions/setup-android@v3
+      with:
+        api-level: 34
+        build-tools-version: 34.0.0
+        ndk-version: 25.1.8937393
+        
+    - name: 🔧 Configure Android Environment
+      run: |
+        echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
+        echo "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" >> $GITHUB_PATH
+        echo "$ANDROID_SDK_ROOT/platform-tools" >> $GITHUB_PATH
+        
+    - name: 📝 Accept Android Licenses
+      run: |
+        yes | sdkmanager --licenses || echo "License acceptance completed"
+        sdkmanager "platform-tools" "build-tools;34.0.0" "platforms;android-34"
+        
+    - name: 🐦 Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.38.3'
+        channel: 'stable'
+        cache: true
+        
+    - name: 🗄️ Cache Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.pub-cache
+          .dart_tool
+        key: flutter-deps-${{ runner.os }}-${{ hashFiles('pubspec.lock') }}
+        restore-keys: |
+          flutter-deps-${{ runner.os }}-
+          
+    - name: 📦 Get Flutter Dependencies
+      run: |
+        flutter --version
+        flutter pub get
+        
+    - name: 🔍 Verify Flutter Setup
+      run: |
+        flutter doctor -v
+        flutter config --android-sdk $ANDROID_SDK_ROOT
+        
+    - name: 🔨 Generate Required Code
+      run: |
+        echo "Generating code for VitalMed Pro..."
+        flutter packages pub run build_runner build --delete-conflicting-outputs
+      continue-on-error: true
+      
+    - name: ✅ Run Code Analysis
+      run: |
+        flutter analyze --no-fatal-infos
+      continue-on-error: true
+      
+    - name: 🧹 Clean Previous Build
+      run: flutter clean
+      
+    - name: 📦 Re-fetch Dependencies
+      run: flutter pub get
+      
+    - name: 🔨 Build Debug APK
+      run: |
+        echo "🚀 Building VitalMed Pro Debug APK..."
+        flutter build apk --debug --verbose
+        
+    - name: 🔨 Build Release APK
+      run: |
+        echo "🚀 Building VitalMed Pro Release APK..."
+        flutter build apk --release --verbose
+        
+    - name: 📊 Verify APK Generation
+      run: |
+        echo "📱 Generated APK files:"
+        ls -la build/app/outputs/flutter-apk/
+        echo ""
+        echo "📂 APK sizes:"
+        du -h build/app/outputs/flutter-apk/*.apk
+        
+    - name: 📤 Upload Debug APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: vitalmed-debug-apk
+        path: build/app/outputs/flutter-apk/app-debug.apk
+        retention-days: 30
+        
+    - name: 📤 Upload Release APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: vitalmed-release-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+        retention-days: 30
+        
+    - name: 📝 Generate Build Report
+      if: always()
+      run: |
+        echo "# 🎯 VitalMed Pro Build Report" > build-report.md
+        echo "" >> build-report.md
+        echo "**Build Status:** ${{ job.status }}" >> build-report.md
+        echo "**Build Date:** $(date)" >> build-report.md
+        echo "**Flutter Version:** $(flutter --version | head -1)" >> build-report.md
+        echo "**Commit:** ${{ github.sha }}" >> build-report.md
+        echo "" >> build-report.md
+        if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
+          echo "✅ **Release APK:** Successfully built" >> build-report.md
+          echo "📱 **APK Size:** $(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)" >> build-report.md
+        else
+          echo "❌ **Release APK:** Build failed" >> build-report.md
+        fi
+        echo "" >> build-report.md
+        echo "## 📋 Installation Guide" >> build-report.md
+        echo "1. Download APK from artifacts above" >> build-report.md
+        echo "2. Enable 'Unknown Sources' on Android device" >> build-report.md
+        echo "3. Install APK and grant BLE permissions" >> build-report.md
+        echo "4. Connect your medical devices and start monitoring!" >> build-report.md
+        
+    - name: 📤 Upload Build Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: build-report
+        path: build-report.md
+        retention-days: 30
+
+  notify:
+    needs: build-apk
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: 🎉 Build Success
+      if: needs.build-apk.result == 'success'
+      run: |
+        echo "🎉 VitalMed Pro APK built successfully!"
+        echo "📱 Ready for real-world BLE health monitoring"
+        echo "🔗 Download: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+        
+    - name: ❌ Build Failed
+      if: needs.build-apk.result == 'failure'
+      run: |
+        echo "❌ Build failed - check logs above"
+        echo "🔗 Logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
